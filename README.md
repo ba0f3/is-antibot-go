@@ -22,6 +22,13 @@
 - **Kasada** - Advanced bot mitigation
 - **Imperva/Incapsula** - Web application firewall
 - **AWS WAF** - Amazon Web Services Web Application Firewall
+- **Reblaze** - Cloud-based web security platform
+- **Cheq** - Bot detection and prevention
+- **Sucuri** - Website security platform and WAF
+- **ThreatMetrix** - LexisNexis fraud prevention and device fingerprinting
+- **Meetrics** - User authenticity verification
+- **Ocule** - Bot detection with advanced obfuscation
+- **LinkedIn** - Bot filter protection
 
 ### CAPTCHA Providers
 
@@ -30,6 +37,10 @@
 - **FunCaptcha** - Arkose Labs interactive challenges
 - **GeeTest** - AI-powered CAPTCHA
 - **Cloudflare Turnstile** - Privacy-preserving CAPTCHA alternative
+- **Friendly Captcha** - GDPR-compliant privacy-first CAPTCHA
+- **Captcha.eu** - European GDPR-compliant CAPTCHA service
+- **QCloud Captcha** - Tencent Cloud CAPTCHA service
+- **AliExpress CAPTCHA** - AliExpress x5sec security challenge
 
 ## Why
 
