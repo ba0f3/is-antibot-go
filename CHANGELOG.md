@@ -1,3 +1,8 @@
+## 1.2.0 (2026-03-26)
+
+### Features
+
+* linkedin ([#6](https://github.com/microlinkhq/is-antibot/issues/6)) ([7eef409](https://github.com/microlinkhq/is-antibot/commit/7eef40986797731d07baabb02daff1153b750f7b))
 ## 1.1.0 (2026-01-18)
 
 * build: contributors ([f29c73b](https://github.com/microlinkhq/is-antibot/commit/f29c73b))
