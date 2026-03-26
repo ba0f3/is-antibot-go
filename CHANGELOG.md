@@ -1,3 +1,8 @@
+## 1.3.0 (2026-03-26)
+
+### Features
+
+* add 11 new providers and enhance 7 existing detections ([#7](https://github.com/microlinkhq/is-antibot/issues/7)) ([886426f](https://github.com/microlinkhq/is-antibot/commit/886426fc24aba42bfedcb6c45f8f44ca3c9ae68b))
 ## 1.2.0 (2026-03-26)
 
 ### Features
