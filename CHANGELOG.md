@@ -1,3 +1,8 @@
+## 1.4.1 (2026-03-30)
+
+### Bug Fixes
+
+* x-datadome as protected is not enough ([#15](https://github.com/microlinkhq/is-antibot/issues/15)) ([aad4ea9](https://github.com/microlinkhq/is-antibot/commit/aad4ea9196a1a6bf4fb269ad4e2d931384afebe0))
 ## 1.4.0 (2026-03-30)
 
 ### Features
