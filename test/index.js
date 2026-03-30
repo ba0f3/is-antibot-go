@@ -335,6 +335,14 @@ test('recaptcha (html grecaptcha)', t => {
   t.is(result.provider, 'recaptcha')
 })
 
+test('recaptcha (no false positive for grecaptcha badge css)', t => {
+  const html =
+    '<style>.grecaptcha-badge{visibility:hidden}</style><title>My Video - YouTube</title>'
+  const result = isAntibot({ html })
+  t.is(result.detected, false)
+  t.is(result.provider, null)
+})
+
 test('recaptcha (html g-recaptcha)', t => {
   const html = '<div class="g-recaptcha" data-sitekey="test"></div>'
   const result = isAntibot({ html })

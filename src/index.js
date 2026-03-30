@@ -237,9 +237,16 @@ const detect = ({ headers = {}, html = '', url = '' } = {}) => {
     return createResult(true, 'recaptcha')
   }
 
-  // reCAPTCHA: Check for grecaptcha global object in html (primary JavaScript indicator)
-  // Reference: https://github.com/scrapfly/Antibot-Detector/blob/main/detectors/captcha/detect-recaptcha.json
-  if (htmlHas('grecaptcha')) {
+  // reCAPTCHA: Check for grecaptcha API usage in html (JavaScript indicator)
+  // Note: plain "grecaptcha" is too broad (e.g. ".grecaptcha-badge" CSS appears on normal YouTube pages)
+  if (
+    htmlHas(
+      '\\b(?:window\\.)?grecaptcha\\s*\\.(?:execute|render|ready|getResponse|enterprise)\\b',
+      true
+    ) ||
+    htmlHas('\\b(?:window\\.)?grecaptcha\\s*\\(', true) ||
+    htmlHas('\\b__grecaptcha_cfg\\b', true)
+  ) {
     return createResult(true, 'recaptcha')
   }
 
