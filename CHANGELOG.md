@@ -1,3 +1,8 @@
+## 1.4.0 (2026-03-30)
+
+### Features
+
+* report detection ([#14](https://github.com/microlinkhq/is-antibot/issues/14)) ([c020a29](https://github.com/microlinkhq/is-antibot/commit/c020a29f929f8345e695cb383b063b8c7cb98125))
 ## 1.3.6 (2026-03-30)
 
 ### Bug Fixes
