@@ -1,3 +1,9 @@
+## 1.5.0 (2026-03-31)
+
+* feat: reddit detection (#16) ([96cbd83](https://github.com/microlinkhq/is-antibot/commit/96cbd83)), closes [#16](https://github.com/microlinkhq/is-antibot/issues/16)
+
+
+
 ## 1.4.1 (2026-03-30)
 
 ### Bug Fixes
