@@ -104,6 +104,19 @@ func TestRedditBlockedHtml(t *testing.T) {
 	}
 }
 
+func TestRedditBlockedByStatusCode(t *testing.T) {
+	headers := http.Header{
+		"Content-Type":  []string{"text/html"},
+		"Server":        []string{"snooserv"},
+		"Cache-Control": []string{"private, no-store"},
+	}
+	url := "https://www.reddit.com/r/digitalnomad/comments/1riz2r5/i_love_mexico_city_but_i_feel_so_unhealthy_here/"
+	result := Detect(Input{Headers: headers, URL: url, StatusCode: 403})
+	if !result.Detected || *result.Provider != "reddit" || *result.Detection != DetectionStatusCode {
+		t.Errorf("Expected reddit statusCode, got %v", result)
+	}
+}
+
 func TestLinkedinStatus999(t *testing.T) {
 	result := Detect(Input{StatusCode: 999, URL: "https://www.linkedin.com/in/wesbos"})
 	if !result.Detected || *result.Provider != "linkedin" || *result.Detection != DetectionStatusCode {

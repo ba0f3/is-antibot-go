@@ -386,16 +386,18 @@ func Detect(input Input) Result {
 	if input.URL != "" {
 		parsedUrl, err := url.Parse(input.URL)
 		if err == nil {
-			domain = parsedUrl.Hostname()
-			if strings.HasPrefix(domain, "www.") {
-				domain = domain[4:]
-			}
+			domain = strings.TrimPrefix(parsedUrl.Hostname(), "www.")
 		}
 	}
 
-	// Reddit
-	if domain == "reddit.com" && hasAnyHtml([]patternMatcher{reRedditBlock}) {
-		return byHtml("reddit")
+	// Reddit: blocked requests are served as HTML challenge pages; 403 is a strong signal without body.
+	if domain == "reddit.com" {
+		if statusCode == 403 {
+			return byStatusCode("reddit")
+		}
+		if hasAnyHtml([]patternMatcher{reRedditBlock}) {
+			return byHtml("reddit")
+		}
 	}
 
 	// LinkedIn
