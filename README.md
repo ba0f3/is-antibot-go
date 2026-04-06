@@ -9,6 +9,8 @@
 
 > Identify if a response is an antibot challenge from CloudFlare, Akamai, DataDome, Vercel, and more.
 
+**Note:** This project is a Golang port of the original JavaScript library [is-antibot](https://github.com/microlinkhq/is-antibot).
+
 ## Supported Providers
 
 ### Anti-Bot Systems
@@ -50,54 +52,57 @@ Websites receiving massive quantities of traffic throughout the day, like Linked
 
 When you try to fetch the HTML of these sites without the right tools, you often hit a 403 Forbidden, 429 Too Many Requests, or a "Please prove you're human" challenge, leaving you with a response that contains no useful data.
 
-**is-antibot** is a lightweight, vendor-agnostic JavaScript library that identifies when a response is actually an antibot challenge, helping you understand when and why your request was blocked.
+**is-antibot** is a lightweight, vendor-agnostic Golang library that identifies when a response is actually an antibot challenge, helping you understand when and why your request was blocked.
 
 ## Install
 
 ```bash
-$ npm install is-antibot --save
+go get github.com/ba0f3/is-antibot-go
 ```
 
 ## Usage
 
-Just pass `headers`, `html`, `url`, and `statusCode` from any HTTP response:
+Just pass `Headers`, `HTML`, `URL`, and `StatusCode` from any HTTP response:
 
-```js
-const isAntibot = require('is-antibot')
+```go
+package main
 
-const response = await fetch('https://www.linkedin.com/in/kikobeats/')
-const html = await response.text()
+import (
+	"fmt"
+	"io"
+	"net/http"
 
-const { detected, provider, detection } = isAntibot({
-  headers: response.headers,
-  statusCode: response.status,
-  html,
-  url: response.url
-})
+	isantibot "github.com/ba0f3/is-antibot-go"
+)
 
-if (detected) {
-  console.log(`Antibot detected: ${provider} via ${detection}`)
+func main() {
+	resp, err := http.Get("https://www.linkedin.com/in/kikobeats/")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	html := string(bodyBytes)
+
+	result := isantibot.Detect(isantibot.Input{
+		Headers:    resp.Header,
+		StatusCode: resp.StatusCode,
+		HTML:       html,
+		URL:        resp.Request.URL.String(),
+	})
+
+	if result.Detected {
+		fmt.Printf("Antibot detected: %s via %s\n", *result.Provider, *result.Detection)
+	}
 }
 ```
 
-It also works with [got](https://github.com/sindresorhus/got) or any library where `body` is a string:
+The library returns a `Result` struct with the following properties:
 
-```js
-const response = await got('https://www.linkedin.com/in/kikobeats/')
-  .catch(error => errorresponse)
-
-const { detected, provider, detection } = isAntibot(response)
-
-if (detected) {
-  console.log(`Antibot detected: ${provider} via ${detection}`)
-}
-```
-
-The library returns an object with the following properties:
-
-- `detected` (boolean): Whether an antibot challenge was detected
-- `provider` (string|null): The name of the detected provider (e.g., 'cloudflare', 'recaptcha')
-- `detection` (string|null): Where the signal came from: `'headers'`, `'cookies'`, `'html'`, `'url'`, or `'statusCode'`
+- `Detected` (bool): Whether an antibot challenge was detected
+- `Provider` (*string): The name of the detected provider (e.g., 'cloudflare', 'recaptcha')
+- `Detection` (*Detection): Where the signal came from: `'headers'`, `'cookies'`, `'html'`, `'url'`, or `'statusCode'`
 
 ## License
 
