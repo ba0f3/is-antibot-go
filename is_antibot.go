@@ -73,6 +73,29 @@ func newRegexpPattern(expr string) regexpPattern {
 	return regexpPattern{re: regexp.MustCompile(expr)}
 }
 
+var (
+	shapeHeaderRe = regexp.MustCompile(`(?i)^x-[a-z0-9]{8}-[abcdfz]$`)
+	reCheqzone    = newRegexpPattern(`(?i)cheqzone\.com`)
+	reCheqAi      = newRegexpPattern(`(?i)cheq\.ai`)
+	reMeetrics    = newRegexpPattern(`(?i)meetrics\.com`)
+	reOcule       = newRegexpPattern(`(?i)ocule\.co\.uk`)
+	reGoogleRecap = newRegexpPattern(`(?i)google\.com/recaptcha`)
+	reGrecaptcha1 = newRegexpPattern(`(?i)\b(?:window\.)?grecaptcha\s*\.(?:execute|render|ready|getResponse|enterprise)\b`)
+	reGrecaptcha2 = newRegexpPattern(`(?i)\b(?:window\.)?grecaptcha\s*\(`)
+	reGrecaptcha3 = newRegexpPattern(`(?i)\b__grecaptcha_cfg\b`)
+	reHcaptcha    = newRegexpPattern(`(?i)hcaptcha\.com`)
+	reArkoselabs  = newRegexpPattern(`(?i)arkoselabs\.com`)
+	reGeetest     = newRegexpPattern(`(?i)geetest\.com`)
+	reCfTurnstile = newRegexpPattern(`(?i)challenges\.cloudflare\.com/turnstile`)
+	reFriendlyCap = newRegexpPattern(`(?i)friendlycaptcha\.com`)
+	reCaptchaEu   = newRegexpPattern(`(?i)captcha\.eu`)
+	reQcloud      = newRegexpPattern(`(?i)turing\.captcha\.qcloud\.com`)
+	reAliExpress  = newRegexpPattern(`(?i)punish\?x5secdata`)
+	reRedditBlock = newRegexpPattern(`(?i)blocked by network security\.`)
+	reInstagram   = newRegexpPattern(`(?i)<title>\s*Login\s*[•·]\s*Instagram\s*</title>`)
+	reYouTube     = newRegexpPattern(`(?i)<title>\s*-\s*YouTube</title>`)
+)
+
 func createTestPattern(value string) func([]patternMatcher) bool {
 	if value == "" {
 		return func(patterns []patternMatcher) bool { return false }
@@ -110,9 +133,14 @@ func Detect(input Input) Result {
 
 	hasCookie := func(pattern string) bool {
 		cookies := headers.Values("set-cookie")
+		lowerPattern := strings.ToLower(pattern)
 		for _, c := range cookies {
-			if strings.HasPrefix(strings.ToLower(c), strings.ToLower(pattern)) {
-				return true
+			// Split by comma in case multiple cookies are joined in a single header value
+			parts := strings.Split(c, ",")
+			for _, part := range parts {
+				if strings.HasPrefix(strings.ToLower(strings.TrimSpace(part)), lowerPattern) {
+					return true
+				}
 			}
 		}
 		return false
@@ -206,7 +234,6 @@ func Detect(input Input) Result {
 	}
 
 	// Shape Security
-	shapeHeaderRe := regexp.MustCompile(`(?i)^x-[a-z0-9]{8}-[abcdfz]$`)
 	for name := range headers {
 		if shapeHeaderRe.MatchString(name) {
 			return byHeaders("shapesecurity")
@@ -247,7 +274,7 @@ func Detect(input Input) Result {
 	if hasAnyHtml([]patternMatcher{stringPattern("CheqSdk"), stringPattern("cheqzone.com")}) {
 		return byHtml("cheq")
 	}
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)cheqzone\.com`), newRegexpPattern(`(?i)cheq\.ai`)}) {
+	if hasAnyUrl([]patternMatcher{reCheqzone, reCheqAi}) {
 		return byUrl("cheq")
 	}
 
@@ -268,7 +295,7 @@ func Detect(input Input) Result {
 	if hasAnyHtml([]patternMatcher{stringPattern("meetrics")}) {
 		return byHtml("meetrics")
 	}
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)meetrics\.com`)}) {
+	if hasAnyUrl([]patternMatcher{reMeetrics}) {
 		return byUrl("meetrics")
 	}
 
@@ -276,19 +303,15 @@ func Detect(input Input) Result {
 	if hasAnyHtml([]patternMatcher{stringPattern("ocule.co.uk")}) {
 		return byHtml("ocule")
 	}
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)ocule\.co\.uk`)}) {
+	if hasAnyUrl([]patternMatcher{reOcule}) {
 		return byUrl("ocule")
 	}
 
 	// reCAPTCHA
-	if hasAnyUrl([]patternMatcher{stringPattern("recaptcha/api"), stringPattern("gstatic.com/recaptcha"), stringPattern("recaptcha.net"), newRegexpPattern(`(?i)google\.com/recaptcha`)}) {
+	if hasAnyUrl([]patternMatcher{stringPattern("recaptcha/api"), stringPattern("gstatic.com/recaptcha"), stringPattern("recaptcha.net"), reGoogleRecap}) {
 		return byUrl("recaptcha")
 	}
-	if hasAnyHtml([]patternMatcher{
-		newRegexpPattern(`(?i)\b(?:window\.)?grecaptcha\s*\.(?:execute|render|ready|getResponse|enterprise)\b`),
-		newRegexpPattern(`(?i)\b(?:window\.)?grecaptcha\s*\(`),
-		newRegexpPattern(`(?i)\b__grecaptcha_cfg\b`),
-	}) {
+	if hasAnyHtml([]patternMatcher{reGrecaptcha1, reGrecaptcha2, reGrecaptcha3}) {
 		return byHtml("recaptcha")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("g-recaptcha")}) {
@@ -296,7 +319,7 @@ func Detect(input Input) Result {
 	}
 
 	// hCaptcha
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)hcaptcha\.com`)}) {
+	if hasAnyUrl([]patternMatcher{reHcaptcha}) {
 		return byUrl("hcaptcha")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("hcaptcha.com"), stringPattern("h-captcha")}) {
@@ -304,7 +327,7 @@ func Detect(input Input) Result {
 	}
 
 	// FunCaptcha
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)arkoselabs\.com`), stringPattern("funcaptcha")}) {
+	if hasAnyUrl([]patternMatcher{reArkoselabs, stringPattern("funcaptcha")}) {
 		return byUrl("funcaptcha")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("arkoselabs.com"), stringPattern("funcaptcha")}) {
@@ -312,7 +335,7 @@ func Detect(input Input) Result {
 	}
 
 	// GeeTest
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)geetest\.com`)}) {
+	if hasAnyUrl([]patternMatcher{reGeetest}) {
 		return byUrl("geetest")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("geetest")}) {
@@ -320,7 +343,7 @@ func Detect(input Input) Result {
 	}
 
 	// Cloudflare Turnstile
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)challenges\.cloudflare\.com/turnstile`)}) {
+	if hasAnyUrl([]patternMatcher{reCfTurnstile}) {
 		return byUrl("cloudflare-turnstile")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("cf-turnstile"), stringPattern("challenges.cloudflare.com/turnstile")}) {
@@ -328,7 +351,7 @@ func Detect(input Input) Result {
 	}
 
 	// Friendly Captcha
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)friendlycaptcha\.com`)}) {
+	if hasAnyUrl([]patternMatcher{reFriendlyCap}) {
 		return byUrl("friendly-captcha")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("frc-captcha"), stringPattern("friendlyChallenge")}) {
@@ -336,7 +359,7 @@ func Detect(input Input) Result {
 	}
 
 	// Captcha.eu
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)captcha\.eu`)}) {
+	if hasAnyUrl([]patternMatcher{reCaptchaEu}) {
 		return byUrl("captcha-eu")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("CaptchaEU"), stringPattern("captchaeu")}) {
@@ -344,7 +367,7 @@ func Detect(input Input) Result {
 	}
 
 	// QCloud Captcha
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)turing\.captcha\.qcloud\.com`)}) {
+	if hasAnyUrl([]patternMatcher{reQcloud}) {
 		return byUrl("qcloud-captcha")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("TencentCaptcha"), stringPattern("turing.captcha")}) {
@@ -352,7 +375,7 @@ func Detect(input Input) Result {
 	}
 
 	// AliExpress CAPTCHA
-	if hasAnyUrl([]patternMatcher{newRegexpPattern(`(?i)punish\?x5secdata`)}) {
+	if hasAnyUrl([]patternMatcher{reAliExpress}) {
 		return byUrl("aliexpress-captcha")
 	}
 	if hasAnyHtml([]patternMatcher{stringPattern("x5secdata")}) {
@@ -371,7 +394,7 @@ func Detect(input Input) Result {
 	}
 
 	// Reddit
-	if domain == "reddit.com" && hasAnyHtml([]patternMatcher{newRegexpPattern(`(?i)blocked by network security\.`)}) {
+	if domain == "reddit.com" && hasAnyHtml([]patternMatcher{reRedditBlock}) {
 		return byHtml("reddit")
 	}
 
@@ -381,12 +404,12 @@ func Detect(input Input) Result {
 	}
 
 	// Instagram
-	if domain == "instagram.com" && hasAnyHtml([]patternMatcher{newRegexpPattern(`(?i)<title>\s*Login\s*[•·]\s*Instagram\s*</title>`)}) {
+	if domain == "instagram.com" && hasAnyHtml([]patternMatcher{reInstagram}) {
 		return byHtml("instagram")
 	}
 
 	// YouTube
-	if hasAnyHtml([]patternMatcher{newRegexpPattern(`(?i)<title>\s*-\s*YouTube</title>`)}) {
+	if hasAnyHtml([]patternMatcher{reYouTube}) {
 		return byHtml("youtube")
 	}
 

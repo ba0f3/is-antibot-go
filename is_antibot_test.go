@@ -149,6 +149,14 @@ func TestAwsWafToken(t *testing.T) {
 	}
 }
 
+func TestHasCookieCommaJoined(t *testing.T) {
+	headers := http.Header{"Set-Cookie": []string{"other=val, datadome=abc123; path=/"}}
+	result := Detect(Input{Headers: headers})
+	if !result.Detected || *result.Provider != "datadome" {
+		t.Errorf("Expected datadome for comma-joined Set-Cookie, got %v", result)
+	}
+}
+
 func TestStatusFallback(t *testing.T) {
 	result := Detect(Input{Status: 999, URL: "https://www.linkedin.com/in/wesbos"})
 	if !result.Detected || *result.Provider != "linkedin" {
