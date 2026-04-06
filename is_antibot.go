@@ -74,26 +74,27 @@ func newRegexpPattern(expr string) regexpPattern {
 }
 
 var (
-	shapeHeaderRe = regexp.MustCompile(`(?i)^x-[a-z0-9]{8}-[abcdfz]$`)
-	reCheqzone    = newRegexpPattern(`(?i)cheqzone\.com`)
-	reCheqAi      = newRegexpPattern(`(?i)cheq\.ai`)
-	reMeetrics    = newRegexpPattern(`(?i)meetrics\.com`)
-	reOcule       = newRegexpPattern(`(?i)ocule\.co\.uk`)
-	reGoogleRecap = newRegexpPattern(`(?i)google\.com/recaptcha`)
-	reGrecaptcha1 = newRegexpPattern(`(?i)\b(?:window\.)?grecaptcha\s*\.(?:execute|render|ready|getResponse|enterprise)\b`)
-	reGrecaptcha2 = newRegexpPattern(`(?i)\b(?:window\.)?grecaptcha\s*\(`)
-	reGrecaptcha3 = newRegexpPattern(`(?i)\b__grecaptcha_cfg\b`)
-	reHcaptcha    = newRegexpPattern(`(?i)hcaptcha\.com`)
-	reArkoselabs  = newRegexpPattern(`(?i)arkoselabs\.com`)
-	reGeetest     = newRegexpPattern(`(?i)geetest\.com`)
-	reCfTurnstile = newRegexpPattern(`(?i)challenges\.cloudflare\.com/turnstile`)
-	reFriendlyCap = newRegexpPattern(`(?i)friendlycaptcha\.com`)
-	reCaptchaEu   = newRegexpPattern(`(?i)captcha\.eu`)
-	reQcloud      = newRegexpPattern(`(?i)turing\.captcha\.qcloud\.com`)
-	reAliExpress  = newRegexpPattern(`(?i)punish\?x5secdata`)
-	reRedditBlock = newRegexpPattern(`(?i)blocked by network security\.`)
-	reInstagram   = newRegexpPattern(`(?i)<title>\s*Login\s*[•·]\s*Instagram\s*</title>`)
-	reYouTube     = newRegexpPattern(`(?i)<title>\s*-\s*YouTube</title>`)
+	shapeHeaderRe     = regexp.MustCompile(`(?i)^x-[a-z0-9]{8}-[abcdfz]$`)
+	reCheqzone        = newRegexpPattern(`(?i)cheqzone\.com`)
+	reCheqAi          = newRegexpPattern(`(?i)cheq\.ai`)
+	reMeetrics        = newRegexpPattern(`(?i)meetrics\.com`)
+	reOcule           = newRegexpPattern(`(?i)ocule\.co\.uk`)
+	reGoogleRecap     = newRegexpPattern(`(?i)google\.com/recaptcha`)
+	reGrecaptcha1     = newRegexpPattern(`(?i)\b(?:window\.)?grecaptcha\s*\.(?:execute|render|ready|getResponse|enterprise)\b`)
+	reGrecaptcha2     = newRegexpPattern(`(?i)\b(?:window\.)?grecaptcha\s*\(`)
+	reGrecaptcha3     = newRegexpPattern(`(?i)\b__grecaptcha_cfg\b`)
+	reHcaptcha        = newRegexpPattern(`(?i)hcaptcha\.com`)
+	reArkoselabs      = newRegexpPattern(`(?i)arkoselabs\.com`)
+	reGeetest         = newRegexpPattern(`(?i)geetest\.com`)
+	reCfTurnstile     = newRegexpPattern(`(?i)challenges\.cloudflare\.com/turnstile`)
+	reFriendlyCap     = newRegexpPattern(`(?i)friendlycaptcha\.com`)
+	reCaptchaEu       = newRegexpPattern(`(?i)captcha\.eu`)
+	reQcloud          = newRegexpPattern(`(?i)turing\.captcha\.qcloud\.com`)
+	reAliExpress      = newRegexpPattern(`(?i)punish\?x5secdata`)
+	reRedditBlock     = newRegexpPattern(`(?i)blocked by network security\.`)
+	reInstagram       = newRegexpPattern(`(?i)<title>\s*Login\s*[•·]\s*Instagram\s*</title>`)
+	reYouTube         = newRegexpPattern(`(?i)<title>\s*-\s*YouTube</title>`)
+	reAnubisChallenge = newRegexpPattern(`<script id="anubis_challenge"`)
 )
 
 func createTestPattern(value string) func([]patternMatcher) bool {
@@ -413,6 +414,15 @@ func Detect(input Input) Result {
 	// YouTube
 	if hasAnyHtml([]patternMatcher{reYouTube}) {
 		return byHtml("youtube")
+	}
+
+	// Anubis (Techaro BotStopper): challenge pages contain the JSON script block
+	// `<script id="anubis_challenge" type="application/json">` and asset/API URLs under StaticPath.
+	if hasAnyHtml([]patternMatcher{
+		reAnubisChallenge,
+		stringPattern("/.within.website/x/cmd/anubis/"),
+	}) {
+		return byHtml("anubis")
 	}
 
 	// AWS WAF

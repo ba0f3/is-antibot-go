@@ -140,6 +140,46 @@ func TestYoutubeEmptyTitle(t *testing.T) {
 	}
 }
 
+func TestAnubisChallengeScript(t *testing.T) {
+	html := "<script id=\"anubis_challenge\" type=\"application/json\">{\"rules\":{\"algorithm\":\"metarefresh\"}}</script>"
+	result := Detect(Input{HTML: html})
+	if !result.Detected || *result.Provider != "anubis" || *result.Detection != DetectionHTML {
+		t.Errorf("Expected anubis html, got %v", result)
+	}
+}
+
+func TestAnubisStaticPath(t *testing.T) {
+	html := "<img src=\"https://example.com/.within.website/x/cmd/anubis/static/img/pensive.webp\">"
+	result := Detect(Input{HTML: html})
+	if !result.Detected || *result.Provider != "anubis" || *result.Detection != DetectionHTML {
+		t.Errorf("Expected anubis html, got %v", result)
+	}
+}
+
+func TestAnubisNoFalsePositivePlainText(t *testing.T) {
+	html := "<p>The template uses anubis_challenge as a key</p>"
+	result := Detect(Input{HTML: html, Headers: http.Header{}})
+	if result.Detected {
+		t.Errorf("Expected no detection, got %v", result)
+	}
+}
+
+func TestAnubisNoFalsePositiveDiv(t *testing.T) {
+	html := "<div id=\"anubis_challenge\">some content</div>"
+	result := Detect(Input{HTML: html, Headers: http.Header{}})
+	if result.Detected {
+		t.Errorf("Expected no detection, got %v", result)
+	}
+}
+
+func TestAnubisNoFalsePositiveWithinWebsiteMention(t *testing.T) {
+	html := "<p>Read more at within.website blog</p>"
+	result := Detect(Input{HTML: html, Headers: http.Header{}})
+	if result.Detected {
+		t.Errorf("Expected no detection, got %v", result)
+	}
+}
+
 func TestNoAntibot(t *testing.T) {
 	result := Detect(Input{})
 	if result.Detected || result.Provider != nil || result.Detection != nil {
