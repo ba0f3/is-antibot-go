@@ -156,6 +156,14 @@ func TestAnubisStaticPath(t *testing.T) {
 	}
 }
 
+func TestAnubisRegexCaseSensitive(t *testing.T) {
+	html := `<SCRIPT id="anubis_challenge" type="application/json">{"rules":{"algorithm":"metarefresh"}}</SCRIPT>`
+	result := Detect(Input{HTML: html, Headers: http.Header{}})
+	if result.Detected {
+		t.Errorf("Expected no detection for uppercase SCRIPT, got %v", result)
+	}
+}
+
 func TestAnubisNoFalsePositivePlainText(t *testing.T) {
 	html := "<p>The template uses anubis_challenge as a key</p>"
 	result := Detect(Input{HTML: html, Headers: http.Header{}})

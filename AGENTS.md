@@ -6,6 +6,7 @@ This repository is a **Go port** of the JavaScript library [microlinkhq/is-antib
 
 - Import path: `github.com/ba0f3/is-antibot-go`
 - Go version: see `go.mod`
+- **Upstream alignment:** detection rules and tests are manually kept in sync with [microlinkhq/is-antibot](https://github.com/microlinkhq/is-antibot) tag **`v2.0.0`** (upstream rules live in `src/providers.json`). Bump this note when you port a newer upstream release.
 
 ## Layout
 

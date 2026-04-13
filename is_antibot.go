@@ -182,7 +182,7 @@ func Detect(input Input) Result {
 	byUrl := func(provider string) Result { return createResult(true, provider, DetectionURL) }
 	byStatusCode := func(provider string) Result { return createResult(true, provider, DetectionStatusCode) }
 
-	// CloudFlare
+	// Cloudflare
 	if getHeader("cf-mitigated") == "challenge" {
 		return byHeaders("cloudflare")
 	}
